@@ -67,6 +67,7 @@ function extractImageFromResponse(response: any): CreateImageResponse {
 async function generateByImageModel(
   client: GoogleGenAI,
   payload: CreateImagePayload,
+  provider: string,
 ): Promise<CreateImageResponse> {
   const { model, params } = payload;
 
@@ -94,7 +95,41 @@ async function generateByImageModel(
   // I think we can just hard code png now
   const imageUrl = `data:image/png;base64,${imageBytes}`;
 
-  return { imageUrl };
+  const result: CreateImageResponse = { imageUrl };
+
+  // Add model usage if available
+  if ((response as any).usageMetadata) {
+    const pricing = await getModelPricing(model, provider);
+    result.modelUsage = convertGoogleAIUsage((response as any).usageMetadata, pricing);
+  } else {
+    // For Imagen models, add fixed pricing information
+    const pricing = await getModelPricing(model, provider);
+    if (pricing?.units?.find((u) => u.unit === 'image')) {
+      const imageUnit = pricing.units.find((u) => u.unit === 'image');
+      const unitPrice =
+        imageUnit?.strategy === 'fixed'
+          ? (imageUnit as any).rate
+          : imageUnit?.strategy === 'tiered' && imageUnit.tiers?.[0]
+            ? imageUnit.tiers[0].rate
+            : 0;
+
+      if (unitPrice) {
+        result.modelUsage = {
+          cost: unitPrice / 1000,
+          fixedPricing: {
+            quantity: 1,
+            // Convert to dollars (rates are in milli-dollars)
+totalCost: unitPrice / 1000,
+            
+unit: 'image', 
+            unitPrice: unitPrice / 1000,
+          },
+        };
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -184,7 +219,7 @@ export async function createGoogleImage(
     }
 
     // Handle traditional Imagen models that use generateImages
-    return await generateByImageModel(client, payload);
+    return await generateByImageModel(client, payload, provider);
   } catch (error) {
     const err = error as Error;
 

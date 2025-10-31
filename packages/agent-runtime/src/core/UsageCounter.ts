@@ -96,13 +96,32 @@ export class UsageCounter {
       const currValue = current[field] as number | undefined;
 
       if (prevValue !== undefined || currValue !== undefined) {
-        merged[field] = (prevValue || 0) + (currValue || 0);
+        (merged as any)[field] = (prevValue || 0) + (currValue || 0);
       }
     }
 
     // Accumulate cost
     if (previous.cost !== undefined || current.cost !== undefined) {
       merged.cost = (previous.cost || 0) + (current.cost || 0);
+    }
+
+    // Handle fixed pricing
+    if (previous.fixedPricing || current.fixedPricing) {
+      if (previous.fixedPricing && current.fixedPricing) {
+        // Merge fixed pricing when both have it
+        merged.fixedPricing = {
+          quantity: previous.fixedPricing.quantity + current.fixedPricing.quantity,
+          // Assume same price per unit
+totalCost: previous.fixedPricing.totalCost + current.fixedPricing.totalCost, 
+          
+unit: previous.fixedPricing.unit, 
+          // Assume same unit
+unitPrice: previous.fixedPricing.unitPrice,
+        };
+      } else {
+        // Use whichever one exists
+        merged.fixedPricing = previous.fixedPricing || current.fixedPricing;
+      }
     }
 
     return merged;

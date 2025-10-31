@@ -4,6 +4,7 @@ import {
   FileSource,
   Generation,
   ImageGenerationAsset,
+  ModelUsage,
 } from '@lobechat/types';
 import debug from 'debug';
 import { and, eq } from 'drizzle-orm';
@@ -99,6 +100,7 @@ export class GenerationModel {
     id: string,
     asset: ImageGenerationAsset,
     file: Omit<NewFile, 'id' | 'userId'>,
+    modelUsage?: ModelUsage,
   ) {
     log('Creating generation asset and file with transaction: %s', id);
 
@@ -114,12 +116,13 @@ export class GenerationModel {
         tx,
       );
 
-      // Update generation with asset and fileId using the transaction-aware update method
+      // Update generation with asset, fileId and modelUsage using the transaction-aware update method
       await this.update(
         id,
         {
           asset,
           fileId: newFile.id,
+          modelUsage,
         },
         tx,
       );
@@ -187,6 +190,7 @@ export class GenerationModel {
       asyncTaskId: generation.asyncTaskId || null,
       createdAt: generation.createdAt,
       id: generation.id,
+      modelUsage: generation.modelUsage as ModelUsage | null,
       seed: generation.seed,
       task: {
         error: generation.asyncTask?.error

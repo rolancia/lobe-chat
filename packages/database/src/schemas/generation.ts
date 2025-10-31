@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
-import { ImageGenerationAsset } from '@lobechat/types';
+import { ImageGenerationAsset, ModelUsage } from '@lobechat/types';
 import { integer, jsonb, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 
@@ -115,6 +115,9 @@ export const generations = pgTable('generations', {
 
   /** 生成的资源信息，包含存储在 s3 上的 key, 图片实际宽高，缩略图 key 等 */
   asset: jsonb('asset').$type<ImageGenerationAsset>(),
+
+  /** 模型使用信息，包含 token 数量和费用 */
+  modelUsage: jsonb('model_usage').$type<ModelUsage>(),
 
   ...timestamps,
 });

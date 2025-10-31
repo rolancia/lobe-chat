@@ -63,6 +63,9 @@ export const getDetailsToken = (
   const totalCredit =
     inputCacheMissCredit + inputCachedCredit + inputWriteCachedCredit + totalOutputCredit;
 
+  // Calculate total tokens if not provided
+  const calculatedTotalTokens = usage.totalTokens || totalInputTokens + totalOutputTokens;
+
   return {
     inputAudio: !!usage.inputAudioTokens
       ? {
@@ -119,14 +122,17 @@ export const getDetailsToken = (
         }
       : undefined,
 
-    totalInput: !!totalInputTokens
-      ? { credit: totalInputCredit, token: totalInputTokens }
-      : undefined,
-    totalOutput: !!totalOutputTokens
-      ? { credit: totalOutputCredit, token: totalOutputTokens }
-      : undefined,
-    totalTokens: !!usage.totalTokens
-      ? { credit: totalCredit, token: usage.totalTokens }
-      : undefined,
+    totalInput:
+      totalInputTokens !== undefined
+        ? { credit: totalInputCredit, token: totalInputTokens }
+        : undefined,
+    totalOutput:
+      totalOutputTokens !== undefined
+        ? { credit: totalOutputCredit, token: totalOutputTokens }
+        : undefined,
+    totalTokens:
+      calculatedTotalTokens !== undefined && calculatedTotalTokens > 0
+        ? { credit: totalCredit, token: calculatedTotalTokens }
+        : undefined,
   };
 };

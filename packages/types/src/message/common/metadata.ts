@@ -40,9 +40,23 @@ export interface ModelTokensUsage {
 
 export interface ModelUsage extends ModelTokensUsage {
   /**
-   * dollar
+   * Total cost in dollars (calculated from tokens or fixed pricing)
    */
   cost?: number;
+
+  /**
+   * For fixed-price models (e.g., image generation per image)
+   */
+  fixedPricing?: {
+    /** Number of units (e.g., number of images) */
+    quantity: number;
+    /** Unit type (e.g., 'image', 'request') */
+    unit: string;
+    /** Price per unit */
+    unitPrice: number;
+    /** Total fixed cost */
+    totalCost: number;
+  };
 }
 
 export interface ModelPerformance {

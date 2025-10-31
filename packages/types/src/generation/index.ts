@@ -1,4 +1,5 @@
 import { AsyncTaskError, AsyncTaskStatus } from '../asyncTask';
+import { ModelUsage } from '../message';
 
 export interface ImageGenerationTopic {
   coverUrl?: string | null;
@@ -63,6 +64,10 @@ export interface Generation {
   asyncTaskId: string | null;
   createdAt: Date;
   id: string;
+  /**
+   * Model usage information including token counts and cost
+   */
+  modelUsage?: ModelUsage | null;
   seed?: number | null;
 
   task: GenerationAsyncTask;

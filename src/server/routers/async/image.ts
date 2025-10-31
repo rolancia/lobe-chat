@@ -229,11 +229,12 @@ export const imageRouter = router({
           imageUrl: response.imageUrl.startsWith('data:')
             ? response.imageUrl.slice(0, IMAGE_URL_PREVIEW_LENGTH) + '...'
             : response.imageUrl,
+          modelUsage: response.modelUsage,
           width: response.width,
         });
 
         log('Transforming image for generation');
-        const { imageUrl, width, height } = response;
+        const { imageUrl, width, height, modelUsage } = response;
 
         // Extract ComfyUI authentication headers if provider is ComfyUI
         let authHeaders: Record<string, string> | undefined;
@@ -288,6 +289,7 @@ export const imageRouter = router({
             size: image.size,
             url: uploadedImageUrl,
           },
+          modelUsage,
         );
 
         log('Updating task status to Success: %s', taskId);
